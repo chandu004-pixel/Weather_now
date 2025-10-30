@@ -15,15 +15,14 @@ import type { WeatherData, ForecastData, ProcessedForecast } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // --- API & UTILITY FUNCTIONS ---
-// IMPORTANT: Replace "YOUR_OPENWEATHERMAP_API_KEY" with your actual key.
 // For better security, use environment variables. Create a file named .env.local in your project root:
 // NEXT_PUBLIC_OPENWEATHERMAP_API_KEY=your_key_here
-const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY || "YOUR_OPENWEATHERMAP_API_KEY";
+const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const fetchWeather = async (city: string) => {
-  if (API_KEY === "YOUR_OPENWEATHERMAP_API_KEY") {
-    throw new Error("Please replace 'YOUR_OPENWEATHERMAP_API_KEY' with your actual OpenWeatherMap API key.");
+  if (!API_KEY || API_KEY === "YOUR_OPENWEATHERMAP_API_KEY") {
+    throw new Error("Please add your OpenWeatherMap API key to the .env.local file.");
   }
 
   const [currentWeatherResponse, forecastResponse] = await Promise.all([
