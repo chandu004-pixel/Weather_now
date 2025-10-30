@@ -15,20 +15,26 @@ import type { WeatherData, ForecastData, ProcessedForecast } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // --- API & UTILITY FUNCTIONS ---
-const API_KEY = "0c82bd4252c09088eeecd5a48a4e86b2";
+const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const fetchWeather = async (city: string) => {
+  if (!API_KEY) {
+    throw new Error('OpenWeatherMap API key is missing. Please add it to your environment variables.');
+  }
   const [currentWeatherResponse, forecastResponse] = await Promise.all([
     fetch(`${API_BASE_URL}/weather?q=${city}&units=metric&appid=${API_KEY}`),
     fetch(`${API_BASE_URL}/forecast?q=${city}&units=metric&appid=${API_KEY}`),
   ]);
 
   if (!currentWeatherResponse.ok || !forecastResponse.ok) {
+    if (currentWeatherResponse.status === 401 || forecastResponse.status === 401) {
+      throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+    }
     if (currentWeatherResponse.status === 404 || forecastResponse.status === 404) {
       throw new Error('City not found. Please try again.');
     }
-    throw new Error('Failed to fetch weather data. Check your API key or network.');
+    throw new Error('Failed to fetch weather data. Check your network connection.');
   }
 
   const currentWeatherData = await currentWeatherResponse.json();
@@ -157,7 +163,9 @@ export default function WeatherWisePage() {
       try {
         const data = await fetchWeather(city);
         setWeatherData(data);
-        setProcessedForecast(processForecastData(data.forecast));
+        if (data.forecast) {
+            setProcessedForecast(processForecastData(data.forecast));
+        }
       } catch (err: any) {
         setError(err.message);
         setWeatherData(null);
@@ -205,8 +213,8 @@ export default function WeatherWisePage() {
             </div>
           )}
           {error && !loading && (
-            <Alert variant="destructive" className="bg-red-500/80 border-red-700 text-white">
-              <AlertCircle className="h-4 w-4 text-white" />
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
