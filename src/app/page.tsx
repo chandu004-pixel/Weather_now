@@ -14,36 +14,43 @@ import { Separator } from "@/components/ui/separator";
 import type { WeatherData, ForecastData, ProcessedForecast } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-// --- API & UTILITY FUNCTIONS ---
-const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
-const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+// --- MOCK DATA & UTILITY FUNCTIONS ---
 
-const fetchWeather = async (city: string) => {
-  if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
-    throw new Error('OpenWeatherMap API key is missing. Please add it to your .env.local file.');
-  }
-  const [currentWeatherResponse, forecastResponse] = await Promise.all([
-    fetch(`${API_BASE_URL}/weather?q=${city}&units=metric&appid=${API_KEY}`),
-    fetch(`${API_BASE_URL}/forecast?q=${city}&units=metric&appid=${API_KEY}`),
-  ]);
+const mockWeatherData: WeatherData = {
+  coord: { lon: -0.1257, lat: 51.5085 },
+  weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }],
+  base: "stations",
+  main: { temp: 18.5, feels_like: 18.2, temp_min: 16, temp_max: 21, pressure: 1012, humidity: 68 },
+  visibility: 10000,
+  wind: { speed: 4.63, deg: 240 },
+  clouds: { all: 20 },
+  dt: 1689786000,
+  sys: { type: 2, id: 2075535, country: "GB", sunrise: 1689740033, sunset: 1689797893 },
+  timezone: 3600,
+  id: 2643743,
+  name: "London",
+  cod: 200,
+};
 
-  if (!currentWeatherResponse.ok || !forecastResponse.ok) {
-    if (currentWeatherResponse.status === 401 || forecastResponse.status === 401) {
-      throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
-    }
-    if (currentWeatherResponse.status === 404 || forecastResponse.status === 404) {
-      throw new Error('City not found. Please try again.');
-    }
-    throw new Error('Failed to fetch weather data. Check your network connection.');
-  }
-
-  const currentWeatherData = await currentWeatherResponse.json();
-  const forecastData = await forecastResponse.json();
-
-  return {
-    current: currentWeatherData,
-    forecast: forecastData,
-  };
+const mockForecastData: ForecastData = {
+    cod: "200",
+    message: 0,
+    cnt: 40,
+    list: [
+        // Today (will be skipped)
+        { dt: 1689782400, main: { temp: 18, temp_min: 17, temp_max: 19, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 68, temp_kf: 0.27 }, weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }], clouds: { all: 20 }, wind: { speed: 4.0, deg: 240 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date().toISOString().split('T')[0] + " 15:00:00" },
+        // Tomorrow
+        { dt: 1689868800, main: { temp: 20, temp_min: 15, temp_max: 22, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 0 }, wind: { speed: 3.0, deg: 210 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        // Day after tomorrow
+        { dt: 1689955200, main: { temp: 19, temp_min: 14, temp_max: 21, pressure: 1016, sea_level: 1016, grnd_level: 1015, humidity: 65, temp_kf: -0.32 }, weather: [{ id: 500, main: "Rain", description: "light rain", icon: "10d" }], clouds: { all: 75 }, wind: { speed: 5.0, deg: 190 }, visibility: 10000, pop: 0.4, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        // 3 days from now
+        { dt: 1690041600, main: { temp: 21, temp_min: 16, temp_max: 23, pressure: 1014, sea_level: 1014, grnd_level: 1013, humidity: 55, temp_kf: -0.21 }, weather: [{ id: 802, main: "Clouds", description: "scattered clouds", icon: "03d" }], clouds: { all: 40 }, wind: { speed: 3.5, deg: 220 }, visibility: 10000, pop: 0.1, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        // 4 days from now
+        { dt: 1690128000, main: { temp: 22, temp_min: 17, temp_max: 24, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 58, temp_kf: -0.15 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 10 }, wind: { speed: 2.5, deg: 200 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        // 5 days from now
+        { dt: 1690214400, main: { temp: 18, temp_min: 13, temp_max: 20, pressure: 1018, sea_level: 1018, grnd_level: 1017, humidity: 70, temp_kf: -0.38 }, weather: [{ id: 501, main: "Rain", description: "moderate rain", icon: "10d" }], clouds: { all: 90 }, wind: { speed: 6.0, deg: 180 }, visibility: 10000, pop: 0.7, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+    ],
+    city: { id: 2643743, name: "London", coord: { lat: 51.5085, lon: -0.1257 }, country: "GB", population: 1000000, timezone: 3600, sunrise: 1689740033, sunset: 1689797893 },
 };
 
 const processForecastData = (forecastData: ForecastData): ProcessedForecast[] => {
@@ -157,26 +164,29 @@ export default function WeatherWisePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadWeather = async () => {
+    const loadWeather = () => {
       setLoading(true);
       setError(null);
-      try {
-        const data = await fetchWeather(city);
-        setWeatherData(data);
-        if (data.forecast) {
-            setProcessedForecast(processForecastData(data.forecast));
+      
+      // Simulate an API call
+      setTimeout(() => {
+        if (searchTerm.toLowerCase() === 'error') {
+           setError("This is a sample error message.");
+           setWeatherData(null);
+           setProcessedForecast(null);
+        } else {
+            const mockData = {
+                current: { ...mockWeatherData, name: city },
+                forecast: { ...mockForecastData, city: { ...mockForecastData.city, name: city } },
+            }
+            setWeatherData(mockData);
+            setProcessedForecast(processForecastData(mockData.forecast));
         }
-      } catch (err: any) {
-        setError(err.message);
-        setWeatherData(null);
-        setProcessedForecast(null);
-      } finally {
         setLoading(false);
-      }
+      }, 1000);
     };
-    if (city) {
-        loadWeather();
-    }
+    
+    loadWeather();
   }, [city]);
 
   const handleSearch = (e: FormEvent) => {
@@ -195,7 +205,7 @@ export default function WeatherWisePage() {
           <form onSubmit={handleSearch} className="flex gap-2">
             <Input 
               type="text" 
-              placeholder="Search for a city..."
+              placeholder="Search for a city... (try 'error')"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-white/20 text-inherit placeholder:text-inherit/70 border-white/30 focus:bg-white/30 focus:ring-accent"
