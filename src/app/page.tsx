@@ -19,8 +19,8 @@ const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const fetchWeather = async (city: string) => {
-  if (!API_KEY) {
-    throw new Error('OpenWeatherMap API key is missing. Please add it to your environment variables.');
+  if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
+    throw new Error('OpenWeatherMap API key is missing. Please add it to your .env.local file.');
   }
   const [currentWeatherResponse, forecastResponse] = await Promise.all([
     fetch(`${API_BASE_URL}/weather?q=${city}&units=metric&appid=${API_KEY}`),
