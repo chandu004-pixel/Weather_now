@@ -31,7 +31,7 @@ const generateMockData = (city: string, temp: number, weatherMain: "Clear" | "Cl
 
   const current: WeatherData = {
     coord: { lon: 0, lat: 0 },
-    weather: [{ ...weatherMap[weatherMain] }],
+    weather: [{ ...weatherMap[weatherMain], main: weatherMain }],
     base: "stations",
     main: { temp: temp, feels_like: temp - 2, temp_min: temp - 5, temp_max: temp + 5, pressure: 1012, humidity: 68 },
     visibility: 10000,
@@ -52,7 +52,7 @@ const generateMockData = (city: string, temp: number, weatherMain: "Clear" | "Cl
       return {
           dt: Math.floor(forecastDate.getTime() / 1000),
           main: { temp: forecastTemp, temp_min: forecastTemp - 3, temp_max: forecastTemp + 3, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 },
-          weather: [{ ...weatherMap[i % 2 === 0 ? "Clouds" : "Clear"] }],
+          weather: [{ ...weatherMap[i % 2 === 0 ? "Clouds" : "Clear"], main: i % 2 === 0 ? "Clouds" : "Clear" }],
           clouds: { all: i % 2 === 0 ? 75 : 20 },
           wind: { speed: 3.0, deg: 210, gust: 4.0 },
           visibility: 10000,
@@ -254,9 +254,9 @@ export default function WeatherWisePage() {
   const bgClass = getWeatherBgClass(weatherData?.current.weather[0].main);
 
   return (
-    <main className="flex min-h-screen w-full items-center justify-center p-4"  aria-label="WeatherWise application">
-      <Card className={cn("w-full max-w-4xl shadow-2xl transition-all duration-500 bg-gradient-to-br", bgClass)}>
-        <CardHeader>
+    <main className="flex min-h-screen w-full items-center justify-center p-4 bg-gray-100 dark:bg-gray-900"  aria-label="WeatherWise application">
+      <Card className={cn("w-full max-w-4xl shadow-2xl rounded-2xl transition-all duration-500 bg-gradient-to-br overflow-hidden", bgClass)}>
+        <CardHeader className="p-4 md:p-6">
           <CardTitle className="text-center text-3xl font-bold tracking-tight">WeatherNow</CardTitle>
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 mt-4">
             <div className="flex-grow flex gap-2">
@@ -279,28 +279,30 @@ export default function WeatherWisePage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" variant="secondary" size="icon" disabled={loading} aria-label="Search city" className="w-full sm:w-auto">
+            <Button type="submit" variant="secondary" size="icon" disabled={loading} aria-label="Search city" className="w-full sm:w-auto rounded-full">
               {loading ? <Loader2 className="animate-spin" /> : <Search />}
             </Button>
           </form>
         </CardHeader>
-        <CardContent className="p-2 md:p-6 min-h-[480px] flex items-center justify-center">
+        <CardContent className="p-0 md:p-0 min-h-[480px] flex items-center justify-center">
           {loading && (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="w-16 h-16 animate-spin"/>
             </div>
           )}
           {error && !loading && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <div className="p-6">
+              <Alert variant="destructive" className="bg-red-500/80 border-red-700 text-white">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            </div>
           )}
           {weatherData && processedForecast && !loading && (
             <div className="flex flex-col md:flex-row w-full">
               <CurrentWeatherDisplay data={weatherData.current} />
-              <Separator orientation="vertical" className="hidden md:block mx-2 bg-white/30" />
+              <Separator orientation="vertical" className="hidden md:block mx-0 bg-white/30" />
               <ForecastDisplay data={processedForecast} />
             </div>
           )}
@@ -309,5 +311,3 @@ export default function WeatherWisePage() {
     </main>
   );
 }
-
-    
