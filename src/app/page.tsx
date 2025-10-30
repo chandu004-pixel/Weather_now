@@ -39,17 +39,17 @@ const mockForecastData: ForecastData = {
     cnt: 40,
     list: [
         // Today (will be skipped)
-        { dt: 1689782400, main: { temp: 18, temp_min: 17, temp_max: 19, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 68, temp_kf: 0.27 }, weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }], clouds: { all: 20 }, wind: { speed: 4.0, deg: 240 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date().toISOString().split('T')[0] + " 15:00:00" },
+        { dt: 1689782400, main: { temp: 18, temp_min: 17, temp_max: 19, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 68, temp_kf: 0.27 }, weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }], clouds: { all: 20 }, wind: { speed: 4.0, deg: 240, gust: 5.0 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date().toISOString().split('T')[0] + " 15:00:00" },
         // Tomorrow
-        { dt: 1689868800, main: { temp: 20, temp_min: 15, temp_max: 22, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 0 }, wind: { speed: 3.0, deg: 210 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        { dt: 1689868800, main: { temp: 20, temp_min: 15, temp_max: 22, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 0 }, wind: { speed: 3.0, deg: 210, gust: 4.0 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 86400000).toISOString().split('T')[0] + " 12:00:00" },
         // Day after tomorrow
-        { dt: 1689955200, main: { temp: 19, temp_min: 14, temp_max: 21, pressure: 1016, sea_level: 1016, grnd_level: 1015, humidity: 65, temp_kf: -0.32 }, weather: [{ id: 500, main: "Rain", description: "light rain", icon: "10d" }], clouds: { all: 75 }, wind: { speed: 5.0, deg: 190 }, visibility: 10000, pop: 0.4, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        { dt: 1689955200, main: { temp: 19, temp_min: 14, temp_max: 21, pressure: 1016, sea_level: 1016, grnd_level: 1015, humidity: 65, temp_kf: -0.32 }, weather: [{ id: 500, main: "Rain", description: "light rain", icon: "10d" }], clouds: { all: 75 }, wind: { speed: 5.0, deg: 190, gust: 6.0 }, visibility: 10000, pop: 0.4, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
         // 3 days from now
-        { dt: 1690041600, main: { temp: 21, temp_min: 16, temp_max: 23, pressure: 1014, sea_level: 1014, grnd_level: 1013, humidity: 55, temp_kf: -0.21 }, weather: [{ id: 802, main: "Clouds", description: "scattered clouds", icon: "03d" }], clouds: { all: 40 }, wind: { speed: 3.5, deg: 220 }, visibility: 10000, pop: 0.1, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        { dt: 1690041600, main: { temp: 21, temp_min: 16, temp_max: 23, pressure: 1014, sea_level: 1014, grnd_level: 1013, humidity: 55, temp_kf: -0.21 }, weather: [{ id: 802, main: "Clouds", description: "scattered clouds", icon: "03d" }], clouds: { all: 40 }, wind: { speed: 3.5, deg: 220, gust: 4.5 }, visibility: 10000, pop: 0.1, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
         // 4 days from now
-        { dt: 1690128000, main: { temp: 22, temp_min: 17, temp_max: 24, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 58, temp_kf: -0.15 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 10 }, wind: { speed: 2.5, deg: 200 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        { dt: 1690128000, main: { temp: 22, temp_min: 17, temp_max: 24, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 58, temp_kf: -0.15 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 10 }, wind: { speed: 2.5, deg: 200, gust: 3.5 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
         // 5 days from now
-        { dt: 1690214400, main: { temp: 18, temp_min: 13, temp_max: 20, pressure: 1018, sea_level: 1018, grnd_level: 1017, humidity: 70, temp_kf: -0.38 }, weather: [{ id: 501, main: "Rain", description: "moderate rain", icon: "10d" }], clouds: { all: 90 }, wind: { speed: 6.0, deg: 180 }, visibility: 10000, pop: 0.7, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
+        { dt: 1690214400, main: { temp: 18, temp_min: 13, temp_max: 20, pressure: 1018, sea_level: 1018, grnd_level: 1017, humidity: 70, temp_kf: -0.38 }, weather: [{ id: 501, main: "Rain", description: "moderate rain", icon: "10d" }], clouds: { all: 90 }, wind: { speed: 6.0, deg: 180, gust: 7.0 }, visibility: 10000, pop: 0.7, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
     ],
     city: { id: 2643743, name: "London", coord: { lat: 51.5085, lon: -0.1257 }, country: "GB", population: 1000000, timezone: 3600, sunrise: 1689740033, sunset: 1689797893 },
 };
@@ -102,7 +102,12 @@ const getWeatherIcon = (iconCode: string, className?: string): ReactElement => {
   return iconMap[iconCode] || <Cloudy {...iconProps} />;
 };
 
-const majorCities = ["London", "New York", "Tokyo", "Mumbai", "Delhi", "Bengaluru", "Paris", "Sydney"];
+const majorCities = [
+    "Mumbai", "Delhi", "Bengaluru", "Kolkata", "Chennai", "Hyderabad", 
+    "New York", "London", "Paris", "Tokyo", "Sydney", "Dubai", "Singapore",
+    "Los Angeles", "Chicago", "Toronto", "Moscow", "Beijing", "Shanghai",
+    "Cairo", "Rio de Janeiro", "Buenos Aires", "Mexico City", "Lagos"
+].sort();
 
 const getWeatherBgClass = (weatherMain: string | undefined): string => {
   if (!weatherMain) return 'from-gray-700 to-gray-800 text-white';
