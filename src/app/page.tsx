@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, type FormEvent, type ReactElement } from "react";
@@ -17,42 +18,88 @@ import { cn } from "@/lib/utils";
 
 // --- MOCK DATA & UTILITY FUNCTIONS ---
 
-const mockWeatherData: WeatherData = {
-  coord: { lon: -0.1257, lat: 51.5085 },
-  weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }],
-  base: "stations",
-  main: { temp: 18.5, feels_like: 18.2, temp_min: 16, temp_max: 21, pressure: 1012, humidity: 68 },
-  visibility: 10000,
-  wind: { speed: 4.63, deg: 240 },
-  clouds: { all: 20 },
-  dt: 1689786000,
-  sys: { type: 2, id: 2075535, country: "GB", sunrise: 1689740033, sunset: 1689797893 },
-  timezone: 3600,
-  id: 2643743,
-  name: "London",
-  cod: 200,
+const generateMockData = (city: string, temp: number, weatherMain: "Clear" | "Clouds" | "Rain" | "Snow" | "Drizzle" | "Thunderstorm", country: string): { current: WeatherData, forecast: ForecastData } => {
+  const date = new Date();
+  const weatherMap = {
+    Clear: { id: 800, description: "clear sky", icon: "01d" },
+    Clouds: { id: 802, description: "scattered clouds", icon: "03d" },
+    Rain: { id: 501, description: "moderate rain", icon: "10d" },
+    Snow: { id: 601, description: "snow", icon: "13d" },
+    Drizzle: { id: 301, description: "drizzle", icon: "09d" },
+    Thunderstorm: { id: 211, description: "thunderstorm", icon: "11d" }
+  };
+
+  const current: WeatherData = {
+    coord: { lon: 0, lat: 0 },
+    weather: [{ ...weatherMap[weatherMain] }],
+    base: "stations",
+    main: { temp: temp, feels_like: temp - 2, temp_min: temp - 5, temp_max: temp + 5, pressure: 1012, humidity: 68 },
+    visibility: 10000,
+    wind: { speed: 4.63, deg: 240 },
+    clouds: { all: 40 },
+    dt: Math.floor(date.getTime() / 1000),
+    sys: { type: 2, id: 2075535, country: country, sunrise: 0, sunset: 0 },
+    timezone: 0,
+    id: 1,
+    name: city,
+    cod: 200,
+  };
+
+  const list: ForecastData['list'] = Array.from({ length: 5 }, (_, i) => {
+      const forecastDate = new Date(date);
+      forecastDate.setDate(date.getDate() + i + 1);
+      const forecastTemp = temp + (i * 2) - 3;
+      return {
+          dt: Math.floor(forecastDate.getTime() / 1000),
+          main: { temp: forecastTemp, temp_min: forecastTemp - 3, temp_max: forecastTemp + 3, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 },
+          weather: [{ ...weatherMap[i % 2 === 0 ? "Clouds" : "Clear"] }],
+          clouds: { all: i % 2 === 0 ? 75 : 20 },
+          wind: { speed: 3.0, deg: 210, gust: 4.0 },
+          visibility: 10000,
+          pop: 0.1,
+          sys: { pod: "d" },
+          dt_txt: forecastDate.toISOString().split('T')[0] + " 12:00:00",
+      };
+  });
+
+  const forecast: ForecastData = {
+      cod: "200",
+      message: 0,
+      cnt: 40,
+      list,
+      city: { id: 1, name: city, coord: { lat: 0, lon: 0 }, country: country, population: 1000000, timezone: 0, sunrise: 0, sunset: 0 },
+  };
+
+  return { current, forecast };
 };
 
-const mockForecastData: ForecastData = {
-    cod: "200",
-    message: 0,
-    cnt: 40,
-    list: [
-        // Today (will be skipped)
-        { dt: 1689782400, main: { temp: 18, temp_min: 17, temp_max: 19, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 68, temp_kf: 0.27 }, weather: [{ id: 801, main: "Clouds", description: "few clouds", icon: "02d" }], clouds: { all: 20 }, wind: { speed: 4.0, deg: 240, gust: 5.0 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date().toISOString().split('T')[0] + " 15:00:00" },
-        // Tomorrow
-        { dt: 1689868800, main: { temp: 20, temp_min: 15, temp_max: 22, pressure: 1015, sea_level: 1015, grnd_level: 1014, humidity: 60, temp_kf: -0.45 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 0 }, wind: { speed: 3.0, deg: 210, gust: 4.0 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 86400000).toISOString().split('T')[0] + " 12:00:00" },
-        // Day after tomorrow
-        { dt: 1689955200, main: { temp: 19, temp_min: 14, temp_max: 21, pressure: 1016, sea_level: 1016, grnd_level: 1015, humidity: 65, temp_kf: -0.32 }, weather: [{ id: 500, main: "Rain", description: "light rain", icon: "10d" }], clouds: { all: 75 }, wind: { speed: 5.0, deg: 190, gust: 6.0 }, visibility: 10000, pop: 0.4, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
-        // 3 days from now
-        { dt: 1690041600, main: { temp: 21, temp_min: 16, temp_max: 23, pressure: 1014, sea_level: 1014, grnd_level: 1013, humidity: 55, temp_kf: -0.21 }, weather: [{ id: 802, main: "Clouds", description: "scattered clouds", icon: "03d" }], clouds: { all: 40 }, wind: { speed: 3.5, deg: 220, gust: 4.5 }, visibility: 10000, pop: 0.1, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
-        // 4 days from now
-        { dt: 1690128000, main: { temp: 22, temp_min: 17, temp_max: 24, pressure: 1012, sea_level: 1012, grnd_level: 1011, humidity: 58, temp_kf: -0.15 }, weather: [{ id: 800, main: "Clear", description: "clear sky", icon: "01d" }], clouds: { all: 10 }, wind: { speed: 2.5, deg: 200, gust: 3.5 }, visibility: 10000, pop: 0, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
-        // 5 days from now
-        { dt: 1690214400, main: { temp: 18, temp_min: 13, temp_max: 20, pressure: 1018, sea_level: 1018, grnd_level: 1017, humidity: 70, temp_kf: -0.38 }, weather: [{ id: 501, main: "Rain", description: "moderate rain", icon: "10d" }], clouds: { all: 90 }, wind: { speed: 6.0, deg: 180, gust: 7.0 }, visibility: 10000, pop: 0.7, sys: { pod: "d" }, dt_txt: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] + " 12:00:00" },
-    ],
-    city: { id: 2643743, name: "London", coord: { lat: 51.5085, lon: -0.1257 }, country: "GB", population: 1000000, timezone: 3600, sunrise: 1689740033, sunset: 1689797893 },
+const cityMockData: { [city: string]: { current: WeatherData; forecast: ForecastData } } = {
+  "London": generateMockData("London", 18, "Clouds", "GB"),
+  "Mumbai": generateMockData("Mumbai", 32, "Rain", "IN"),
+  "Delhi": generateMockData("Delhi", 35, "Clear", "IN"),
+  "Bengaluru": generateMockData("Bengaluru", 28, "Clouds", "IN"),
+  "Kolkata": generateMockData("Kolkata", 31, "Rain", "IN"),
+  "Chennai": generateMockData("Chennai", 34, "Clear", "IN"),
+  "Hyderabad": generateMockData("Hyderabad", 30, "Clouds", "IN"),
+  "New York": generateMockData("New York", 22, "Clear", "US"),
+  "Paris": generateMockData("Paris", 20, "Clouds", "FR"),
+  "Tokyo": generateMockData("Tokyo", 25, "Rain", "JP"),
+  "Sydney": generateMockData("Sydney", 19, "Clear", "AU"),
+  "Dubai": generateMockData("Dubai", 40, "Clear", "AE"),
+  "Singapore": generateMockData("Singapore", 31, "Thunderstorm", "SG"),
+  "Los Angeles": generateMockData("Los Angeles", 24, "Clear", "US"),
+  "Chicago": generateMockData("Chicago", 21, "Clouds", "US"),
+  "Toronto": generateMockData("Toronto", 19, "Rain", "CA"),
+  "Moscow": generateMockData("Moscow", 17, "Clouds", "RU"),
+  "Beijing": generateMockData("Beijing", 26, "Clear", "CN"),
+  "Shanghai": generateMockData("Shanghai", 28, "Rain", "CN"),
+  "Cairo": generateMockData("Cairo", 36, "Clear", "EG"),
+  "Rio de Janeiro": generateMockData("Rio de Janeiro", 27, "Clouds", "BR"),
+  "Buenos Aires": generateMockData("Buenos Aires", 19, "Clouds", "AR"),
+  "Mexico City": generateMockData("Mexico City", 23, "Rain", "MX"),
+  "Lagos": generateMockData("Lagos", 29, "Thunderstorm", "NG"),
 };
+
 
 const processForecastData = (forecastData: ForecastData): ProcessedForecast[] => {
     const dailyData: { [key: string]: { temps: number[], icons: string[] } } = {};
@@ -102,12 +149,7 @@ const getWeatherIcon = (iconCode: string, className?: string): ReactElement => {
   return iconMap[iconCode] || <Cloudy {...iconProps} />;
 };
 
-const majorCities = [
-    "Mumbai", "Delhi", "Bengaluru", "Kolkata", "Chennai", "Hyderabad", 
-    "New York", "London", "Paris", "Tokyo", "Sydney", "Dubai", "Singapore",
-    "Los Angeles", "Chicago", "Toronto", "Moscow", "Beijing", "Shanghai",
-    "Cairo", "Rio de Janeiro", "Buenos Aires", "Mexico City", "Lagos"
-].sort();
+const majorCities = Object.keys(cityMockData).sort();
 
 const getWeatherBgClass = (weatherMain: string | undefined): string => {
   if (!weatherMain) return 'from-gray-700 to-gray-800 text-white';
@@ -183,15 +225,15 @@ export default function WeatherWisePage() {
            setWeatherData(null);
            setProcessedForecast(null);
         } else {
-            const mockData = {
-                current: { ...mockWeatherData, name: city },
-                forecast: { ...mockForecastData, city: { ...mockForecastData.city, name: city } },
-            }
+            const mockData = cityMockData[city] || {
+                current: { ...cityMockData['London'].current, name: city },
+                forecast: { ...cityMockData['London'].forecast, city: { ...cityMockData['London'].forecast.city, name: city } },
+            };
             setWeatherData(mockData);
             setProcessedForecast(processForecastData(mockData.forecast));
         }
         setLoading(false);
-      }, 1000);
+      }, 500);
     };
     
     loadWeather();
@@ -267,3 +309,5 @@ export default function WeatherWisePage() {
     </main>
   );
 }
+
+    
