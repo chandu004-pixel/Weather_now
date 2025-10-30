@@ -15,16 +15,10 @@ import type { WeatherData, ForecastData, ProcessedForecast } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // --- API & UTILITY FUNCTIONS ---
-// For better security, use environment variables. Create a file named .env.local in your project root:
-// NEXT_PUBLIC_OPENWEATHERMAP_API_KEY=your_key_here
-const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
+const API_KEY = "0c82bd4252c09088eeecd5a48a4e86b2";
 const API_BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 const fetchWeather = async (city: string) => {
-  if (!API_KEY || API_KEY === "YOUR_OPENWEATHERMAP_API_KEY") {
-    throw new Error("Please add your OpenWeatherMap API key to the .env.local file.");
-  }
-
   const [currentWeatherResponse, forecastResponse] = await Promise.all([
     fetch(`${API_BASE_URL}/weather?q=${city}&units=metric&appid=${API_KEY}`),
     fetch(`${API_BASE_URL}/forecast?q=${city}&units=metric&appid=${API_KEY}`),
