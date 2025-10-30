@@ -8,9 +8,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { WeatherData, ForecastData, ProcessedForecast } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +102,7 @@ const getWeatherIcon = (iconCode: string, className?: string): ReactElement => {
   return iconMap[iconCode] || <Cloudy {...iconProps} />;
 };
 
+const majorCities = ["London", "New York", "Tokyo", "Mumbai", "Delhi", "Bengaluru", "Paris", "Sydney"];
 
 const getWeatherBgClass = (weatherMain: string | undefined): string => {
   if (!weatherMain) return 'from-gray-700 to-gray-800 text-white';
@@ -165,12 +167,13 @@ export default function WeatherWisePage() {
 
   useEffect(() => {
     const loadWeather = () => {
+      if (!city) return;
       setLoading(true);
       setError(null);
       
       // Simulate an API call
       setTimeout(() => {
-        if (searchTerm.toLowerCase() === 'error') {
+        if (city.toLowerCase() === 'error') {
            setError("This is a sample error message.");
            setWeatherData(null);
            setProcessedForecast(null);
@@ -196,22 +199,40 @@ export default function WeatherWisePage() {
     }
   };
 
+  const handleCitySelect = (selectedCity: string) => {
+    setSearchTerm(selectedCity);
+    setCity(selectedCity);
+  }
+
   const bgClass = getWeatherBgClass(weatherData?.current.weather[0].main);
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center p-4"  aria-label="WeatherWise application">
       <Card className={cn("w-full max-w-4xl shadow-2xl transition-all duration-500 bg-gradient-to-br", bgClass)}>
         <CardHeader>
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <Input 
-              type="text" 
-              placeholder="Search for a city... (try 'error')"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/20 text-inherit placeholder:text-inherit/70 border-white/30 focus:bg-white/30 focus:ring-accent"
-              aria-label="City search input"
-            />
-            <Button type="submit" variant="secondary" size="icon" disabled={loading} aria-label="Search city">
+          <CardTitle className="text-center text-3xl font-bold tracking-tight">WeatherNow</CardTitle>
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 mt-4">
+            <div className="flex-grow flex gap-2">
+              <Input 
+                type="text" 
+                placeholder="Search for a city... (try 'error')"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-white/20 text-inherit placeholder:text-inherit/70 border-white/30 focus:bg-white/30 focus:ring-accent"
+                aria-label="City search input"
+              />
+              <Select onValueChange={handleCitySelect} value={city}>
+                <SelectTrigger className="w-[180px] bg-white/20 text-inherit border-white/30 focus:bg-white/30 focus:ring-accent" aria-label="Select a city">
+                  <SelectValue placeholder="Or select a city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {majorCities.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" variant="secondary" size="icon" disabled={loading} aria-label="Search city" className="w-full sm:w-auto">
               {loading ? <Loader2 className="animate-spin" /> : <Search />}
             </Button>
           </form>
